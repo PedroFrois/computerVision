@@ -89,6 +89,9 @@ public class OpenCVCamera extends AppCompatActivity implements CameraBridgeViewB
             }
         }
     };
+    private boolean saving;
+    private Double soma;
+    private Integer cont;
 
 
     @Override
@@ -114,6 +117,9 @@ public class OpenCVCamera extends AppCompatActivity implements CameraBridgeViewB
             public void onClick(View v) {
                 if (!startedRecording) {
                     startedRecording = true;
+                    saving = false;
+                    soma = 0.0;
+                    cont = 0;
                     Toast.makeText(OpenCVCamera.this, "Recording Started", Toast.LENGTH_SHORT).show();
 
                 } else {
@@ -202,10 +208,23 @@ public class OpenCVCamera extends AppCompatActivity implements CameraBridgeViewB
 
         meanAux = mean(croppedAux);
 
+
+
         if (startedRecording) {
             Double val = meanAux.val[0] / 180;
-            listOfMeans.add(val);
-            if (abs(meanAux.val[0] - wantedColor.val[0]) < 30) {
+            cont++;
+            if(cont == 10){
+                listOfMeans.add((val+soma)/10);
+                soma = 0.0;
+                cont =0;
+            }else{
+                soma+=val;
+            }
+            if(!saving && listOfMeans.size() >=200){
+                listOfMeans.remove(0);
+            }
+            if(abs(meanAux.val[0] - wantedColor.val[0]) < 9){
+                System.out.println("notificou");
                 try {
                     if (!notificationPlayed) {
                         Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
@@ -216,6 +235,8 @@ public class OpenCVCamera extends AppCompatActivity implements CameraBridgeViewB
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+            }else if (abs(meanAux.val[0] - wantedColor.val[0]) < 30) {
+                saving = true;
             }
         }
 
