@@ -13,7 +13,7 @@
         android:id="@+id/start_button"
         android:layout_width="200dp"
         android:layout_height="wrap_content"
-        android:text="OpenCV Camera"
+        android:text="Open camera"
         android:background="@color/colorAccent"
         android:textColor="@color/colorWhite"
         android:paddingLeft="20dp"

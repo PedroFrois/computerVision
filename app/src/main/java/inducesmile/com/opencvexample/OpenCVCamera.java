@@ -55,6 +55,8 @@ public class OpenCVCamera extends AppCompatActivity implements CameraBridgeViewB
 
     private ImagePreprocessor preprocessor;
 
+    private Boolean startedRecording;
+
 
     private BaseLoaderCallback baseLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -84,18 +86,29 @@ public class OpenCVCamera extends AppCompatActivity implements CameraBridgeViewB
         cameraBridgeViewBase.setCvCameraViewListener(this);
         cameraBridgeViewBase.disableFpsMeter();
 
+        startedRecording = false;
 
 
         ImageView takePictureBtn = (ImageView)findViewById(R.id.take_picture);
         takePictureBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String outPicture = Constants.SCAN_IMAGE_LOCATION + File.separator + Utilities.generateFilename();
-                FolderUtil.createDefaultFolder(Constants.SCAN_IMAGE_LOCATION);
+                //String outPicture = Constants.SCAN_IMAGE_LOCATION + File.separator + Utilities.generateFilename();
+                //FolderUtil.createDefaultFolder(Constants.SCAN_IMAGE_LOCATION);
+                if(!startedRecording){
+                    startedRecording = true;
+                    Toast.makeText(OpenCVCamera.this, "Recording Started", Toast.LENGTH_LONG).show();
 
-                cameraBridgeViewBase.takePicture(outPicture);
-                Toast.makeText(OpenCVCamera.this, "Picture has been taken ", Toast.LENGTH_LONG).show();
-                Log.d(TAG, "Path " + outPicture);
+                } else{
+                    startedRecording = false;
+                    System.out.println();
+                    System.out.println("MANDAR REQUISICAO");
+                    System.out.println();
+                    Toast.makeText(OpenCVCamera.this, "Data sent", Toast.LENGTH_LONG).show();
+                    listOfMeans.clear();
+                }
+                //cameraBridgeViewBase.takePicture(outPicture);
+                //Log.d(TAG, "Path " + outPicture);
             }
         });
     }
@@ -170,7 +183,8 @@ public class OpenCVCamera extends AppCompatActivity implements CameraBridgeViewB
         //System.out.println(mean(croppedAux));
 
         meanAux = mean(croppedAux);
-        listOfMeans.add(meanAux.val[0]/360);
+        if(startedRecording)
+            listOfMeans.add(meanAux.val[0]/360);
 
         return colorRgba;
     }
