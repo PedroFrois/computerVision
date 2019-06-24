@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:background="@color/colorPrimary"
+    tools:context=".MainActivity">
+
+    <Button
+        android:id="@+id/start_button"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:text="OpenCV Camera"
+        android:background="@color/colorAccent"
+        android:textColor="@color/colorWhite"
+        android:paddingLeft="20dp"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingRight="20dp" />
+
+
+    <Button
+        android:id="@+id/document_button"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:text="Image Histogram"
+        android:layout_marginTop="10dp"
+        android:background="@color/colorAccent"
+        android:textColor="@color/colorWhite"
+        android:paddingLeft="20dp"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingRight="20dp" />
+
+
+</LinearLayout>
