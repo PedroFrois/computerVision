@@ -51,7 +51,6 @@ public class OpenCVCamera extends AppCompatActivity implements CameraBridgeViewB
     private OpenCameraView cameraBridgeViewBase;
 
     private Mat colorRgba;
-    private Mat colorRgb;
     private Mat aux;
     private Mat croppedAux;
 
@@ -59,7 +58,7 @@ public class OpenCVCamera extends AppCompatActivity implements CameraBridgeViewB
     private Scalar rectangleColor = new Scalar(255, 0, 0, 0);
     private int[] rectangleShape = new int[]{70, 70};
     private Rect roi;
-    private Scalar wantedColor = new Scalar(59, 0, 0, 0);
+    private Scalar wantedColor = new Scalar(160, 0, 0, 0);
 
     private Boolean notificationPlayed = false;
 
@@ -132,8 +131,6 @@ public class OpenCVCamera extends AppCompatActivity implements CameraBridgeViewB
                             indexString += ";" + i;
                         }
                     }
-                    System.out.println("MeanString");
-                    System.out.println(meansString);
                     sendData(meansString, indexString);
 
                 }
@@ -171,7 +168,6 @@ public class OpenCVCamera extends AppCompatActivity implements CameraBridgeViewB
     @Override
     public void onCameraViewStarted(int width, int height) {
         colorRgba = new Mat(height, width, CvType.CV_8UC4);
-        colorRgb = new Mat(height, width, CvType.CV_8UC4);
         aux = new Mat(height, width, CvType.CV_8UC4);
         croppedAux = new Mat(rectangleShape[1], rectangleShape[0], CvType.CV_8UC4);
 
@@ -201,23 +197,15 @@ public class OpenCVCamera extends AppCompatActivity implements CameraBridgeViewB
         Imgproc.cvtColor(colorRgba, aux, Imgproc.COLOR_RGB2HSV);
         rectangle(colorRgba, start, end, rectangleColor, 4);
 
+
         croppedAux = aux.submat(roi);
 
         meanAux = mean(croppedAux);
 
         if (startedRecording) {
-            System.out.println(inputFrame.rgba().cols());
-            System.out.println(colorRgba.cols());
-            System.out.println(inputFrame.rgba().rows());
-            System.out.println(colorRgba.rows());
-            System.out.println();
-            System.out.println(mean(aux));
-            System.out.println(mean(colorRgba));
-            System.out.println();
-            Double val = meanAux.val[0] / 360;
+            Double val = meanAux.val[0] / 180;
             listOfMeans.add(val);
-            System.out.println(meanAux);
-            if (abs(meanAux.val[0] - wantedColor.val[0]) < 1) {
+            if (abs(meanAux.val[0] - wantedColor.val[0]) < 30) {
                 try {
                     if (!notificationPlayed) {
                         Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
@@ -225,12 +213,9 @@ public class OpenCVCamera extends AppCompatActivity implements CameraBridgeViewB
                         mp.start();
                         notificationPlayed = true;
                     }
-                    System.out.println("Try 4");
                 } catch (Exception e) {
-                    System.out.println("Erro aqui vei");
                     e.printStackTrace();
                 }
-                System.out.println("ACHOU A CARALHA");
             }
         }
 
@@ -250,9 +235,9 @@ public class OpenCVCamera extends AppCompatActivity implements CameraBridgeViewB
                     @Override
                     public void onResponse(String response) {
                         try {
-                            System.out.println("Response get");
+                            //("Response get");
                             JSONObject obj = new JSONObject(response);
-                            System.out.println(obj);
+                            //(obj);
                             String k = obj.get("k").toString();
                             String x0 = obj.get("x0").toString();
                             System.out.println(k);

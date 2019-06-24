@@ -183,8 +183,8 @@ public class MainActivity extends AppCompatActivity {
         clearRepoList();
         // Call our getRepoList() function that is defined above and pass in the
         // text which has been entered into the etGitHubUser text input field.
-        System.out.println("Usuario");
-        System.out.println(etGitHubUser.getText().toString());
+        //("Usuario");
+        //(etGitHubUser.getText().toString());
         getRepoList("lucasmarioza");
     }
 
