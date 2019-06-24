@@ -11,7 +11,6 @@ import java.util.Date;
 
 public class Utilities {
 
-
     private Utilities(){
 
     }
