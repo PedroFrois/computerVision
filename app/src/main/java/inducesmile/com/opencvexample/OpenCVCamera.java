@@ -1,10 +1,8 @@
 package inducesmile.com.opencvexample;
 
 
-import android.media.AudioManager;
-import android.media.Ringtone;
+import android.media.MediaPlayer;
 import android.media.RingtoneManager;
-import android.media.ToneGenerator;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -20,13 +18,9 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
-import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
@@ -38,20 +32,15 @@ import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
-import com.android.volley.toolbox.JsonRequest;
 
-import java.io.File;
-import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
 import inducesmile.com.opencvexample.utils.preprocess.ImagePreprocessor;
-import inducesmile.com.opencvexample.utils.Constants;
-import inducesmile.com.opencvexample.utils.FolderUtil;
-import inducesmile.com.opencvexample.utils.Utilities;
 
+import static java.lang.Math.abs;
 import static org.opencv.core.Core.mean;
 import static org.opencv.core.Core.rectangle;
 
@@ -62,15 +51,17 @@ public class OpenCVCamera extends AppCompatActivity implements CameraBridgeViewB
     private OpenCameraView cameraBridgeViewBase;
 
     private Mat colorRgba;
-    private Mat colorGray;
+    private Mat colorRgb;
     private Mat aux;
     private Mat croppedAux;
 
     private Point start, end, center;
     private Scalar rectangleColor = new Scalar(255, 0, 0, 0);
-    private int rectangleShape[] = new int[]{70, 70};
+    private int[] rectangleShape = new int[]{70, 70};
     private Rect roi;
-    private Scalar wantedColor = new Scalar(0,0,0,0);
+    private Scalar wantedColor = new Scalar(59, 0, 0, 0);
+
+    private Boolean notificationPlayed = false;
 
     private ArrayList<Double> listOfMeans = new ArrayList<Double>();
     private Scalar meanAux = new Scalar(0, 0, 0, 0);
@@ -81,11 +72,9 @@ public class OpenCVCamera extends AppCompatActivity implements CameraBridgeViewB
     private Boolean startedRecording;
 
     //envio servidor
-    private String baseUrl = "https://cv-titration-server.herokuapp.com/fit";
-    private String url = "";
+    private String baseUrl = "https://cv-titration-server.herokuapp.com";
+    private String url;
     private RequestQueue requestQueue;
-    private String dataToSend = "";
-    private TextView tvRepoList;  // This will reference our repo list text box.
 
 
     private BaseLoaderCallback baseLoaderCallback = new BaseLoaderCallback(this) {
@@ -116,6 +105,7 @@ public class OpenCVCamera extends AppCompatActivity implements CameraBridgeViewB
         cameraBridgeViewBase.setCvCameraViewListener(this);
         cameraBridgeViewBase.disableFpsMeter();
 
+
         startedRecording = false;
 
 
@@ -134,28 +124,23 @@ public class OpenCVCamera extends AppCompatActivity implements CameraBridgeViewB
 
                     int i = 0;
                     for (Iterator<Double> elem = listOfMeans.iterator(); elem.hasNext(); i++) {
-
-                        if(i == 0){
-                            meansString = "" + ((Double)elem.next()).toString();
+                        if (i == 0) {
+                            meansString = "" + ((Double) elem.next()).toString();
                             indexString = "" + i;
-                        } else{
-                            meansString += ";" + ((Double)elem.next()).toString();
+                        } else {
+                            meansString += ";" + ((Double) elem.next()).toString();
                             indexString += ";" + i;
                         }
-
                     }
                     System.out.println("MeanString");
                     System.out.println(meansString);
-                    //indexString = "Vai funcionar agora";
-                    getRepoList("pedrofrois", meansString, indexString);
+                    sendData(meansString, indexString);
 
                 }
             }
         });
-
         requestQueue = Volley.newRequestQueue(this);  // This setups up a new request queue which we will need to make HTTP requests.
     }
-
 
     @Override
     public void onPause() {
@@ -186,7 +171,7 @@ public class OpenCVCamera extends AppCompatActivity implements CameraBridgeViewB
     @Override
     public void onCameraViewStarted(int width, int height) {
         colorRgba = new Mat(height, width, CvType.CV_8UC4);
-        colorGray = new Mat(height, width, CvType.CV_8UC1);
+        colorRgb = new Mat(height, width, CvType.CV_8UC4);
         aux = new Mat(height, width, CvType.CV_8UC4);
         croppedAux = new Mat(rectangleShape[1], rectangleShape[0], CvType.CV_8UC4);
 
@@ -221,17 +206,25 @@ public class OpenCVCamera extends AppCompatActivity implements CameraBridgeViewB
         meanAux = mean(croppedAux);
 
         if (startedRecording) {
-            listOfMeans.add(meanAux.val[0] / 360);
-            if(meanAux.val[0] - wantedColor.val[0] < 20) {
-                //ToneGenerator toneGen1 = new ToneGenerator(AudioManager.STREAM_MUSIC, 100);
-                //toneGen1.startTone(ToneGenerator.TONE_CDMA_PIP, 150);
+            System.out.println(inputFrame.rgba().cols());
+            System.out.println(colorRgba.cols());
+            System.out.println(inputFrame.rgba().rows());
+            System.out.println(colorRgba.rows());
+            System.out.println();
+            System.out.println(mean(aux));
+            System.out.println(mean(colorRgba));
+            System.out.println();
+            Double val = meanAux.val[0] / 360;
+            listOfMeans.add(val);
+            System.out.println(meanAux);
+            if (abs(meanAux.val[0] - wantedColor.val[0]) < 1) {
                 try {
-                    System.out.println("Try 1");
-                    Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
-                    System.out.println("Try 2");
-                    Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
-                    System.out.println("Try 3");
-                    r.play();
+                    if (!notificationPlayed) {
+                        Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+                        MediaPlayer mp = MediaPlayer.create(getApplicationContext(), notification);
+                        mp.start();
+                        notificationPlayed = true;
+                    }
                     System.out.println("Try 4");
                 } catch (Exception e) {
                     System.out.println("Erro aqui vei");
@@ -244,26 +237,34 @@ public class OpenCVCamera extends AppCompatActivity implements CameraBridgeViewB
         return colorRgba;
     }
 
-    private void getRepoList(String username, String meansString, String indexString) {
+    private void sendData(String meansString, String indexString) {
         // First, we insert the username into the repo url.
         // The repo url is defined in GitHubs API docs (https://developer.github.com/v3/repos/).
-        this.url = this.baseUrl;
+        this.url = this.baseUrl + "/fit";
 
         // Next, we create a new JsonArrayRequest. This will use Volley to make a HTTP request
         // that expects a JSON Array Response.
         // To fully understand this, I'd recommend readng the office docs: https://developer.android.com/training/volley/index.html
-        JsonObjectRequest arrReq = new JsonObjectRequest(Request.Method.POST, url,
-                new Response.Listener<JSONObject>() {
+        StringRequest arrReq = new StringRequest(Request.Method.POST, url,
+                new Response.Listener<String>() {
                     @Override
-                    public void onResponse(JSONObject response) {
+                    public void onResponse(String response) {
                         try {
                             System.out.println("Response get");
-                            System.out.println(response);
+                            JSONObject obj = new JSONObject(response);
+                            System.out.println(obj);
+                            String k = obj.get("k").toString();
+                            String x0 = obj.get("x0").toString();
+                            System.out.println(k);
+                            System.out.println(x0);
+
+                            Toast.makeText(OpenCVCamera.this, "k = " + k + "    x0 = " + x0,
+                                    Toast.LENGTH_LONG).show();
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
-                        Toast.makeText(OpenCVCamera.this, "Data sent", Toast.LENGTH_SHORT).show();
                         listOfMeans.clear();
+                        notificationPlayed = false;
                     }
                 },
 
@@ -275,12 +276,11 @@ public class OpenCVCamera extends AppCompatActivity implements CameraBridgeViewB
                         Log.e("Volley", error.toString());
                     }
                 }
-        ){
+        ) {
 
             @Override
-            protected Map<String, String> getParams()
-            {
-                Map<String, String>  params = new HashMap<String, String>();
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<String, String>();
                 params.put("index", indexString);
                 params.put("mean", meansString);
 

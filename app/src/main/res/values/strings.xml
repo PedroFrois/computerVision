@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Android OpenCV Examples</string>
+    <string name="app_name">Titration Helper</string>
     <string name="show_histogram">Show Histogram</string>
     <string name="source_image">Source Image</string>
     <string name="select_gallery">Select Image from gallery</string>

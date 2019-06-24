@@ -13,12 +13,13 @@
 
 
     <inducesmile.com.opencvexample.OpenCameraView
-        android:layout_width="match_parent"
+        android:layout_width="450dp"
         android:layout_height="match_parent"
         android:visibility="gone"
         android:id="@+id/camera_view"
         opencv:show_fps="true"
-        opencv:camera_id="any"/>
+        opencv:camera_id="any"
+        android:backgroundTint="@color/colorBlack"/>
 
 
     <ImageView

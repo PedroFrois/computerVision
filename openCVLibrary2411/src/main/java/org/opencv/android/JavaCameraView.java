@@ -197,6 +197,12 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
 
                     /* Finally we are ready to start the preview */
                     Log.d(TAG, "startPreview");
+                    Camera.Parameters x = mCamera.getParameters();
+                    x.setExposureCompensation(-5);
+                    x.setAutoExposureLock(false);
+                    x.setAutoWhiteBalanceLock(false);
+                    x.setVideoStabilization(false);
+                    mCamera.setParameters(x);
                     mCamera.startPreview();
                 }
                 else
