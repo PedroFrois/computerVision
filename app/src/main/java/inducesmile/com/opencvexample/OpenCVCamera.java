@@ -213,14 +213,14 @@ public class OpenCVCamera extends AppCompatActivity implements CameraBridgeViewB
         if (startedRecording) {
             Double val = meanAux.val[0] / 180;
             cont++;
-            if(cont == 10){
+            if(cont == 1){
                 listOfMeans.add((val+soma)/10);
                 soma = 0.0;
-                cont =0;
+                cont = 0;
             }else{
                 soma+=val;
             }
-            if(!saving && listOfMeans.size() >=200){
+            if(!saving && listOfMeans.size() >= 200){
                 listOfMeans.remove(0);
             }
             if(abs(meanAux.val[0] - wantedColor.val[0]) < 9){
