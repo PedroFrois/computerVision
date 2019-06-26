@@ -36,7 +36,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 
-import inducesmile.com.opencvexample.histogram.HistogramActivity;
 import inducesmile.com.opencvexample.utils.Constants;
 import inducesmile.com.opencvexample.utils.ImagePicker;
 import inducesmile.com.opencvexample.utils.Utilities;
@@ -48,15 +47,6 @@ public class MainActivity extends AppCompatActivity {
     private static final int PICK_IMAGE_ID = 303;
 
     private String fileLocation;
-
-
-    private EditText etGitHubUser; // This will be a reference to our GitHub username input.
-    private Button btnGetRepos;  // This is a reference to the "Get Repos" button.
-    private TextView tvRepoList;  // This will reference our repo list text box.
-    private RequestQueue requestQueue;  // This is our requests queue to process our HTTP requests.
-
-    private String baseUrl = "https://api.github.com/users/";  // This is the API base URL (GitHub API)
-    private String url;  // This will hold the full URL which will include the username entered in the etGitHubUser.
 
 
     @Override
@@ -95,98 +85,12 @@ public class MainActivity extends AppCompatActivity {
         scannerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getReposClicked(v);
             }
         });
 
 
-        this.etGitHubUser = (EditText) findViewById(R.id.et_github_user);  // Link our github user text box.
-        this.btnGetRepos = (Button) findViewById(R.id.btn_get_repos);  // Link our clicky button.
-        this.tvRepoList = (TextView) findViewById(R.id.tv_repo_list);  // Link our repository list text output box.
-        this.tvRepoList.setMovementMethod(new ScrollingMovementMethod());  // This makes our text box scrollable, for those big GitHub contributors with lots of repos :)
+       }
 
-        requestQueue = Volley.newRequestQueue(this);  // This setups up a new request queue which we will need to make HTTP requests.
-    }
-
-    private void clearRepoList() {
-        // This will clear the repo list (set it as a blank string).
-        this.tvRepoList.setText("");
-    }
-
-    private void addToRepoList(String repoName, String lastUpdated) {
-        // This will add a new repo to our list.
-        // It combines the repoName and lastUpdated strings together.
-        // And then adds them followed by a new line (\n\n make two new lines).
-        String strRow = repoName + " / " + lastUpdated;
-        String currentText = tvRepoList.getText().toString();
-        this.tvRepoList.setText(currentText + "\n\n" + strRow);
-    }
-
-    private void setRepoListText(String str) {
-        // This is used for setting the text of our repo list box to a specific string.
-        // We will use this to write a "No repos found" message if the user doens't have any.
-        this.tvRepoList.setText(str);
-    }
-
-    private void getRepoList(String username) {
-        // First, we insert the username into the repo url.
-        // The repo url is defined in GitHubs API docs (https://developer.github.com/v3/repos/).
-        this.url = this.baseUrl + username + "/repos";
-
-        // Next, we create a new JsonArrayRequest. This will use Volley to make a HTTP request
-        // that expects a JSON Array Response.
-        // To fully understand this, I'd recommend readng the office docs: https://developer.android.com/training/volley/index.html
-        JsonArrayRequest arrReq = new JsonArrayRequest(Request.Method.GET, url,
-                new Response.Listener<JSONArray>() {
-                    @Override
-                    public void onResponse(JSONArray response) {
-                        // Check the length of our response (to see if the user has any repos)
-                        if (response.length() > 0) {
-                            // The user does have repos, so let's loop through them all.
-                            for (int i = 0; i < response.length(); i++) {
-                                try {
-                                    // For each repo, add a new line to our repo list.
-                                    JSONObject jsonObj = response.getJSONObject(i);
-                                    String repoName = jsonObj.get("name").toString();
-                                    String lastUpdated = jsonObj.get("updated_at").toString();
-                                    addToRepoList(repoName, lastUpdated);
-                                } catch (JSONException e) {
-                                    // If there is an error then output this to the logs.
-                                    Log.e("Volley", "Invalid JSON Object.");
-                                }
-
-                            }
-                        } else {
-                            // The user didn't have any repos.
-                            setRepoListText("No repos found.");
-                        }
-
-                    }
-                },
-
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        // If there a HTTP error then add a note to our repo list.
-                        setRepoListText("Error while calling REST API");
-                        Log.e("Volley", error.toString());
-                    }
-                }
-        );
-        // Add the request we just defined to our request queue.
-        // The request queue will automatically handle the request as soon as it can.
-        requestQueue.add(arrReq);
-    }
-
-    public void getReposClicked(View v) {
-        // Clear the repo list (so we have a fresh screen to add to)
-        clearRepoList();
-        // Call our getRepoList() function that is defined above and pass in the
-        // text which has been entered into the etGitHubUser text input field.
-        //("Usuario");
-        //(etGitHubUser.getText().toString());
-        getRepoList("lucasmarioza");
-    }
 
 
     @Override
